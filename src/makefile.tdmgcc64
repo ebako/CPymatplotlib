@@ -86,7 +86,8 @@ clean :
 #	$(CC) -m32 -o $(TGT).o32 -c $(TGT).c $(CFLAGS)
 
 $(OUT_DIR)/$(TGT).pyd : $(TGT).o32
-	$(LD) -shared -o $(OUT_DIR)/$(TGT).pyd $(LFLAGS32) $(LIB_PRE32) $(TGT).o32 $(LIB_POST32) $(LIB_PYX86) $(LIB_SUBPROD)
+	$(LD) -shared -o $(OUT_DIR)/$(TGT).pyd $(LFLAGS32) \
+$(LIB_PRE32) $(TGT).o32 $(LIB_POST32) $(LIB_PYX86) $(LIB_SUBPROD)
 
 $(TGT).o32 : $(TGT).c
 	$(CC) -m32 -o $(TGT).s32 -S $(TGT).c $(CFLAGS)
