@@ -18,8 +18,6 @@ dllname = 'cpymatplotlib.pyd'
 dllm = tdll.LoadLibrary(dllname)
 testVoid = dllm.testVoid
 testExport = dllm.testExport
-testVoid_cdll = ctypes.cdll.LoadLibrary(dllname).testVoid # BAD
-testExport_cdll = ctypes.cdll.LoadLibrary(dllname).testExport # BAD
 
 testPyObject = cpymatplotlib.testPyObject # or 'from cpymatplotlib import *'
 
@@ -34,10 +32,6 @@ def main():
 
   print 'result0: ', testVoid()
   print 'result2: ', testExport(3, 4)
-  print 'result0: ', testVoid_cdll() # OK but wrong way
-  # print 'result2: ', testExport_cdll(3, 4) # BAD
-  ## ValueError: Procedure called with not enough arguments (8 bytes missing)
-  ##             or wrong calling convention
 
   help(cpymatplotlib)
 
