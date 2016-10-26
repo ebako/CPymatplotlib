@@ -4,13 +4,14 @@
 '''
 
 import sys, os
+import ctypes
+from ctypes import cast, POINTER, py_object, c_int
 
-import cpymatplotlib
 import numpy as np
 import pylab
 
-import ctypes
-from ctypes import cast, POINTER, py_object, c_int
+sys.path.append('../dll')
+import cpymatplotlib
 
 # tdll = ctypes.cdll
 tdll = ctypes.windll

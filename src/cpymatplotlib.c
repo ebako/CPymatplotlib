@@ -3,17 +3,20 @@
 
   ## needless cpymatplotlib.def (auto generated and --add-stdcall-alias)
 
-  gcc -m32 -shared -o cpymatplotlib.pyd cpymatplotlib.c \
+  gcc -m32 -shared -o ../dll/cpymatplotlib.pyd cpymatplotlib.c \
     -I/python25/lib/site-packages/numpy/core/include \
     -I/python25/lib/site-packages/numpy/numarray \
     -I/python25/include \
     -I../include \
     -L/python25/libs -lpython25 \
-    -Wl,-mi386pe,--add-stdcall-alias\
-      ,--out-implib=cpymatplotlib.lib,--output-def=cpymatplotlib.def
+    -Wl,-mi386pe\
+      ,--out-implib=../dll/cpymatplotlib.lib\
+      ,--output-def=../dll/cpymatplotlib.def\
+      ,--add-stdcall-alias
     # ,--add-cdecl-alias # unrecognized option
     # ,--cref
 
+  cp /python25/python.exe ../dll/python25.dll
   test_cpymatplotlib.py
 
   Example of wrapping the cos function from math.h using the Numpy-C-API.
@@ -44,7 +47,7 @@
 #include <math.h>
 
 #define DEBUGLOG 0
-#define TESTLOG "_test_dll_.log"
+#define TESTLOG "../dll/_test_dll_.log"
 
 __PORT uint WINAPI testVoid(void)
 {
