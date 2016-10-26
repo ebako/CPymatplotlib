@@ -1,43 +1,13 @@
 /*
   cpymatplotlib.c
 
-  ## needless cpymatplotlib.def (auto generated and --add-stdcall-alias)
-
-  gcc -m32 -shared -o ../dll/cpymatplotlib.pyd cpymatplotlib.c \
-    -I/python25/lib/site-packages/numpy/core/include \
-    -I/python25/lib/site-packages/numpy/numarray \
-    -I/python25/include \
-    -I../include \
-    -L/python25/libs -lpython25 \
-    -Wl,-mi386pe\
-      ,--out-implib=../dll/cpymatplotlib.lib\
-      ,--output-def=../dll/cpymatplotlib.def\
-      ,--add-stdcall-alias
-    # ,--add-cdecl-alias # unrecognized option
-    # ,--cref
-
-  cp /python25/python.exe ../dll/python25.dll
-  test_cpymatplotlib.py
+  >mingw32-make -f makefile.tdmgcc64
+  >test_cpymatplotlib.py
 
   Example of wrapping the cos function from math.h using the Numpy-C-API.
   http://www.turbare.net/transl/scipy-lecture-notes/advanced/interfacing_with_c/interfacing_with_c.html
     2.8. C interface (2.8.2. Python-C-Api) (2.8.2.2. Numpy)
     http://www.turbare.net/transl/scipy-lecture-notes/advanced/interfacing_with_c/interfacing_with_c.html#id1
-
-  numpy.get_include()
-  -I/.../lib/site-packages/numpy/core/include
-    ( lib/site-packages/numpy/core/include/numpy/*.h )
-  -I/.../lib/site-packages/numpy/numarray
-    ( lib/site-packages/numpy/numarray/numpy/*.h )
-  -I/.../include
-    ( .../include/Python.h )
-  -L.../libs -lpython*
-    ( .../libs/python*.lib )
-  ## needless _fake_python25.def
-  # -L. -l_fake_python*
-  #   ( ./_fake_python*.lib )
-  # dlltool -mi386 --dllname python*.dll \
-  #   --input-def _fake_python*.def --output-lib lib_fake_python*.a
 */
 
 #define __CPYMATPLOTLIB_MAKE_DLL_

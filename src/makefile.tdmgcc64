@@ -1,4 +1,6 @@
 # makefile for .pyd (32bit)
+# needless cpymatplotlib.def (auto generated and --add-stdcall-alias)
+# numpy.get_include() to get include path
 TGT = cpymatplotlib
 OUT_DIR_ = ..\dll
 OUT_DIR = ../dll
