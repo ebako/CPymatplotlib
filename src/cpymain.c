@@ -59,11 +59,9 @@ int main(int ac, char **av)
   if(!memcache){
     fprintf(stderr, "cannot import memcache\n");
   }else{
-    PyObject *lst = PyList_New(1);
-    PyList_SetItem(lst, 0, PyString_FromString("127.0.0.1:11211"));
-    PyObject *kw = PyDict_New();
-    PyDict_SetItemString(kw, "debug", PyLong_FromLong(0));
-    PyDict_SetItemString(kw, "server_max_key_length", PyLong_FromLong(999));
+    PyObject *lst = Py_BuildValue("[s]", "127.0.0.1:11211");
+    PyObject *kw = Py_BuildValue("{sisi}",
+      "debug", 0, "server_max_key_length", 999);
     mem = PyObject_CallMethod(memcache, "Client", "OO", lst, kw);
     if(!mem) fprintf(stderr, "cannot get memcache.Client(...)\n");
   }
