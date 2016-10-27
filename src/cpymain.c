@@ -45,13 +45,52 @@ int main(int ac, char **av)
       }else{
         char *s;
         Py_INCREF(o);
-        if(!PyArg_Parse(o, "s", &s)){
+        if(!PyArg_Parse(o, "s", &s)){ // s = PyString_AsString(o);
           fprintf(stderr, "cannot parse StringObject\n");
         }else{
           fprintf(stdout, "resultPO['s']: [%s]\n", s);
         }
       }
       Py_DECREF(po);
+    }
+  }
+  PyObject *mem = NULL;
+  PyObject *memcache = PyImport_ImportModule("memcache");
+  if(!memcache){
+    fprintf(stderr, "cannot import memcache\n");
+  }else{
+    PyObject *lst = PyList_New(1);
+    PyList_SetItem(lst, 0, PyString_FromString("127.0.0.1:11211"));
+    PyObject *kw = PyDict_New();
+    PyDict_SetItemString(kw, "debug", PyLong_FromLong(0));
+    PyDict_SetItemString(kw, "server_max_key_length", PyLong_FromLong(999));
+    mem = PyObject_CallMethod(memcache, "Client", "OO", lst, kw);
+    if(!mem) fprintf(stderr, "cannot get memcache.Client(...)\n");
+  }
+  PyObject *hb = NULL;
+  PyObject *http = NULL;
+  PyObject *httplib2 = PyImport_ImportModule("httplib2");
+  if(!httplib2){
+    fprintf(stderr, "cannot import httplib2\n");
+  }else{
+    PyObject *kw = PyDict_New();
+    PyDict_SetItemString(kw, "timeout", PyLong_FromLong(5));
+    PyDict_SetItemString(kw, "disable_ssl_certificate_validation", Py_True);
+    // http = PyObject_CallMethod(httplib2, "Http", "OO", mem, kw);
+    http = PyObject_CallMethod(httplib2, "Http", "O", mem); // skip timeout/ssl
+    if(!http) fprintf(stderr, "cannot get httplib2.Http(...)\n");
+    // status:"408"=RequestTimeout instead of timeout exception
+    PyObject_SetAttrString(http, "force_exception_to_status_code", Py_True);
+    hb = PyObject_CallMethod(http, "request", "s", "http://localhost:8080/");
+    if(!hb) fprintf(stderr, "cannot get http.request(...)\n");
+  }
+  if(mem && http && hb){
+    PyObject *header = PyTuple_GetItem(hb, 0);
+    PyObject *status = PyDict_GetItemString(header, "status");
+    fprintf(stdout, "status: %s\n", PyString_AsString(status)); // "500" "200"
+    if(!strcmp(PyString_AsString(status), "200")){
+      PyObject *bdy = PyTuple_GetItem(hb, 1);
+      fprintf(stdout, "body: %s\n", PyString_AsString(bdy));
     }
   }
 #if 0
