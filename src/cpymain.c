@@ -83,6 +83,7 @@ int main(int ac, char **av)
     }else{
       int ndim = 1;
       npy_intp dims[] = {10}; // [NPY_MAXDIMS]
+#if 0
 //    PyObject *x = PyObject_CallMethod(np, "arange", "ddd", 0.2, 0.4, 0.02);
       PyObject *x = PyArray_Arange(0.1, 0.5, 0.05, NPY_DOUBLE);
 //    PyObject *x = PyArray_Arange(10, 50, 5, NPY_INT); // careful to (double)y
@@ -93,13 +94,21 @@ int main(int ac, char **av)
 //    PyObject *x = PyArray_SimpleNewFromData(ndim, dims, NPY_DOUBLE, d);
       dims[0] = PyArray_DIMS(x)[0];
       PyObject *y = PyArray_SimpleNew(ndim, dims, NPY_DOUBLE); // no initialize
+#else
+      PyObject *x = PyObject_CallMethod(np, "arange", "ddd", 0., 6.19, 0.02);
+      dims[0] = PyArray_DIMS(x)[0];
+      PyObject *y = PyObject_CallMethod(cpymatplotlib, "lissajous_np",
+        "Odd", x, 4., 3.);
+#endif
       if(!x || !y){
         fprintf(stderr, "cannot allocate ndarray x or y\n");
       }else{
+#if 0
         double *src = (double *)PyArray_DATA(x);
         double *dst = (double *)PyArray_DATA(y);
         int i;
         for(i = 0; i < PyArray_DIMS(x)[0]; ++i) *dst++ = exp(-10. * *src++);
+#endif
         fprintf(stdout, "allocate ndarray [%d]\n", dims[0]);
         Py_INCREF(x);
         Py_INCREF(y);
