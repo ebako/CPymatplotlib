@@ -18,6 +18,7 @@
 int main(int ac, char **av)
 {
   char buf[BUFSIZE];
+  int i;
   if(sizeof(size_t) > 4){
     fprintf(stderr, "May be running 64bit version.\nskipped.\n");
     return 1;
@@ -54,6 +55,21 @@ int main(int ac, char **av)
       Py_DECREF(po);
     }
   }
+#if 1 // success
+  char *lines[] = {
+    "import memcache",
+    "import httplib2",
+    "mem = memcache.Client(['127.0.0.1:11211'],"\
+     " debug=0, server_max_key_length=999)",
+    "http = httplib2.Http(mem,"\
+     " timeout=5, disable_ssl_certificate_validation=True)",
+    "http.force_exception_to_status_code = True",
+    "header, bdy = http.request('https://www.google.com/')",
+    "sys.stdout.write('status: %s\\n' % header['status'])",
+    "if header['status'] == '200': sys.stdout.write('body: %s\\n' % bdy)"};
+  for(i = 0; i < sizeof(lines) / sizeof(lines[0]); ++i)
+    PyRun_SimpleString(lines[i]);
+#else // status=400 when using httplib2.Http(mem, **kwargs)
   PyObject *mem = NULL;
   PyObject *memcache = PyImport_ImportModule("memcache");
   if(!memcache){
@@ -73,14 +89,16 @@ int main(int ac, char **av)
   }else{
     PyObject *kw = Py_BuildValue("{sisO}",
       "timeout", 5, "disable_ssl_certificate_validation", Py_True);
-//  http = PyObject_CallMethod(httplib2, "Http", "OO", mem, kw);
-    http = PyObject_CallMethod(httplib2, "Http", "O", mem); // skip timeout/ssl
+    http = PyObject_CallMethod(httplib2, "Http", "OO", mem, kw);
+//  http = PyObject_CallMethod(httplib2, "Http", "O", mem); // skip timeout/ssl
     if(!http) fprintf(stderr, "cannot get httplib2.Http(...)\n");
     // status:"408"=RequestTimeout instead of timeout exception
-    PyObject_SetAttrString(http, "force_exception_to_status_code", Py_True);
+    PyObject *t = Py_True;
+    Py_INCREF(t);
+    PyObject_SetAttrString(http, "force_exception_to_status_code", t);
 //  char *url = "http://localhost:8080/";
-    char *url = "http://www.google.com/";
-//  char *url = "https://www.google.com/";
+//  char *url = "http://www.google.com/";
+    char *url = "https://www.google.com/";
     hb = PyObject_CallMethod(http, "request", "s", url);
     if(!hb) fprintf(stderr, "cannot get http.request(...)\n");
   }
@@ -93,6 +111,7 @@ int main(int ac, char **av)
       fprintf(stdout, "body: %s\n", PyString_AsString(bdy));
     }
   }
+#endif
 #if 0
   fprintf(stdout, ">>> ");
   while(fgets(buf, sizeof(buf), stdin)){
