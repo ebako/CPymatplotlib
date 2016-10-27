@@ -75,13 +75,18 @@ int main(int ac, char **av)
   }else{
     PyObject *kw = PyDict_New();
     PyDict_SetItemString(kw, "timeout", PyLong_FromLong(5));
-    PyDict_SetItemString(kw, "disable_ssl_certificate_validation", Py_True);
-    // http = PyObject_CallMethod(httplib2, "Http", "OO", mem, kw);
-    http = PyObject_CallMethod(httplib2, "Http", "O", mem); // skip timeout/ssl
+    PyObject *t = Py_True;
+    Py_INCREF(t);
+    PyDict_SetItemString(kw, "disable_ssl_certificate_validation", t);
+    http = PyObject_CallMethod(httplib2, "Http", "OO", mem, kw);
+//  http = PyObject_CallMethod(httplib2, "Http", "O", mem); // skip timeout/ssl
     if(!http) fprintf(stderr, "cannot get httplib2.Http(...)\n");
     // status:"408"=RequestTimeout instead of timeout exception
     PyObject_SetAttrString(http, "force_exception_to_status_code", Py_True);
-    hb = PyObject_CallMethod(http, "request", "s", "http://localhost:8080/");
+//  char *url = "http://localhost:8080/";
+//  char *url = "http://www.google.com/";
+    char *url = "https://www.google.com/";
+    hb = PyObject_CallMethod(http, "request", "s", url);
     if(!hb) fprintf(stderr, "cannot get http.request(...)\n");
   }
   if(mem && http && hb){
