@@ -50,7 +50,7 @@ def draw_realtime(seconds):
   axis = [fig.add_subplot(221 + _ % 4) for _ in range(4)]
   t = 0
   for i in range(seconds * 10): # about seconds when time.sleep(.01)
-    th = np.arange(0, 1.98 * np.pi, 0.05) + t / 20.
+    th = np.arange(0, 1.98 * np.pi, 0.05) - t / 20.
     y = cpymatplotlib.cos_func_np(th)
     axis[2].plot(th, y)
     [draw_curve(axis, _, th) for _ in range(4) if _ != 2]

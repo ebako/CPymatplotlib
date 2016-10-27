@@ -13,7 +13,15 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <numpy/arrayobject.h>
+#include <math.h>
+
 #define BUFSIZE 4096
+
+void prepare_numpy()
+{
+  import_array(); // IMPORTANT: this must be called (return void)
+}
 
 int main(int ac, char **av)
 {
@@ -55,11 +63,52 @@ int main(int ac, char **av)
       Py_DECREF(po);
     }
   }
-#if 1
+#if 0 // success
   PyRun_SimpleString("sys.path.append('../src')");
   PyRun_SimpleString("from test_cpymatplotlib import draw_realtime as dreal");
   PyRun_SimpleString("dreal(10)");
   // Fatal Python error: PyEval_RestoreThread: NULL tstate
+#else
+  PyObject *np = PyImport_ImportModule("numpy");
+  prepare_numpy(); // IMPORTANT: this must be called (return void)
+  PyObject *pylab = PyImport_ImportModule("pylab");
+  if(!np || !pylab){
+    fprintf(stderr, "cannot import numpy or pylab\n");
+  }else{
+    PyObject *fig = PyObject_CallMethod(pylab, "figure", NULL);
+    PyObject *ax0 = PyObject_CallMethod(fig, "add_subplot", "i", 211);
+    PyObject *ax1 = PyObject_CallMethod(fig, "add_subplot", "i", 212);
+    if(!ax0 || !ax1){
+      fprintf(stderr, "cannot add_subplot ax0 or ax1\n");
+    }else{
+      int ndim = 1;
+      npy_intp dims[] = {10}; // [NPY_MAXDIMS]
+//    PyObject *x = PyObject_CallMethod(np, "arange", "ddd", 0.2, 0.4, 0.02);
+      PyObject *x = PyArray_Arange(0.1, 0.5, 0.05, NPY_DOUBLE);
+//    PyObject *x = PyArray_Arange(10, 50, 5, NPY_INT); // careful to (double)y
+//    PyObject *x = PyArray_ZEROS(ndim, dims, NPY_DOUBLE, 0); // fortran:0
+//    PyObject *x = PyArray_SimpleNew(ndim, dims, NPY_DOUBLE); // no initialize
+//    double d[] = {0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9};
+//    dims[0] = sizeof(d) / sizeof(d[0]);
+//    PyObject *x = PyArray_SimpleNewFromData(ndim, dims, NPY_DOUBLE, d);
+      dims[0] = PyArray_DIMS(x)[0];
+      PyObject *y = PyArray_SimpleNew(ndim, dims, NPY_DOUBLE); // no initialize
+      if(!x || !y){
+        fprintf(stderr, "cannot allocate ndarray x or y\n");
+      }else{
+        double *src = (double *)PyArray_DATA(x);
+        double *dst = (double *)PyArray_DATA(y);
+        int i;
+        for(i = 0; i < PyArray_DIMS(x)[0]; ++i) *dst++ = exp(-10. * *src++);
+        fprintf(stdout, "allocate ndarray [%d]\n", dims[0]);
+        Py_INCREF(x);
+        Py_INCREF(y);
+        PyObject_CallMethod(ax0, "plot", "OO", x, y);
+        PyObject_CallMethod(ax1, "plot", "OO", y, x);
+      }
+    }
+    PyObject_CallMethod(pylab, "show", NULL);
+  }
 #endif
 #if 0 // success
   char *lines[] = {

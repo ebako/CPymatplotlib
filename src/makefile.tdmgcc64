@@ -64,7 +64,7 @@ LIB_SUBPROD = $(LIB_IMP) $(LIB_DEF) --add-stdcall-alias
 
 #all : $(TGT).exe $(TGT).64.exe $(TGT).32.exe
 all : $(OUT_DIR)/$(PYD).pyd \
-$(OUT_DIR)/$(TGT).exe $(OUT_DIR)/$(TGT).64.exe $(OUT_DIR)/$(TGT).32.exe
+$(OUT_DIR)/$(TGT).32.exe # $(OUT_DIR)/$(TGT).exe $(OUT_DIR)/$(TGT).64.exe
 
 clean :
 	del *.o
