@@ -5,6 +5,10 @@
 #ifndef __CPYMATPLOTLIB_H__
 #define __CPYMATPLOTLIB_H__
 
+#ifndef UNICODE
+#define UNICODE
+#endif
+
 #include <Python.h>
 #include <windows.h>
 #include <stdio.h>
