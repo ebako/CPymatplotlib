@@ -73,11 +73,8 @@ int main(int ac, char **av)
   if(!httplib2){
     fprintf(stderr, "cannot import httplib2\n");
   }else{
-    PyObject *kw = PyDict_New();
-    PyDict_SetItemString(kw, "timeout", PyLong_FromLong(5));
-    PyObject *t = Py_True;
-    Py_INCREF(t);
-    PyDict_SetItemString(kw, "disable_ssl_certificate_validation", t);
+    PyObject *kw = Py_BuildValue("{sisO}",
+      "timeout", 5, "disable_ssl_certificate_validation", Py_True);
     http = PyObject_CallMethod(httplib2, "Http", "OO", mem, kw);
 //  http = PyObject_CallMethod(httplib2, "Http", "O", mem); // skip timeout/ssl
     if(!http) fprintf(stderr, "cannot get httplib2.Http(...)\n");
