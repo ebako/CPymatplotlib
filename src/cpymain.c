@@ -55,6 +55,12 @@ int main(int ac, char **av)
       Py_DECREF(po);
     }
   }
+#if 1
+  PyRun_SimpleString("sys.path.append('../src')");
+  PyRun_SimpleString("from test_cpymatplotlib import draw_realtime as dreal");
+  PyRun_SimpleString("dreal(10)");
+  // Fatal Python error: PyEval_RestoreThread: NULL tstate
+#endif
 #if 0 // success
   char *lines[] = {
     "import memcache",
