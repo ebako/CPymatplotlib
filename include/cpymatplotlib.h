@@ -29,5 +29,6 @@ __PORT uint WINAPI testExport(uint a, uint b);
 // must not use WINAPI when returns PyObject *
 __PORT PyObject *testPyObject(PyObject *self, PyObject *args, PyObject *kw);
 __PORT PyObject *cos_func_np(PyObject *self, PyObject *args);
+__PORT PyObject *lissajous_np(PyObject *self, PyObject *args);
 
 #endif // __CPYMATPLOTLIB_H__

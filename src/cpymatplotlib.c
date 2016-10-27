@@ -154,6 +154,33 @@ fail:
   return NULL;
 }
 
+__PORT PyObject *lissajous_np(PyObject *self, PyObject *args)
+{
+  PyArrayObject *in_array;
+  PyObject *out_array;
+
+  if(!PyArg_ParseTuple(args, "O!", &PyArray_Type, &in_array)) return NULL;
+  out_array = PyArray_SimpleNew(
+    PyArray_NDIM(in_array), PyArray_DIMS(in_array), PyArray_TYPE(in_array));
+  if(out_array == NULL) return NULL;
+  else{
+    double *din = (double *)PyArray_DATA(in_array);
+    double *dout = (double *)PyArray_DATA(out_array);
+    int i;
+    for(i = 0; i < PyArray_DIMS(in_array)[0]; ++i){ // overwrite X-Y
+      *dout++ = cos(*din * 3.);
+      *din = sin(*din * 4.);
+      ++din;
+    }
+  }
+  Py_INCREF(out_array);
+  return out_array;
+
+fail:
+  Py_XDECREF(out_array);
+  return NULL;
+}
+
 static PyMethodDef cpymatplotlib_methods[] = {
   {"testPyObject", (PyCFunction)testPyObject,
     METH_VARARGS | METH_KEYWORDS, "*args, **kw:\n"
@@ -164,6 +191,8 @@ static PyMethodDef cpymatplotlib_methods[] = {
     "result: dict"},
   {"cos_func_np", (PyCFunction)cos_func_np, METH_VARARGS,
     "evaluate the cosine on a numpy array"},
+  {"lissajous_np", (PyCFunction)lissajous_np, METH_VARARGS,
+    "X-Y lissajous on a numpy array"},
   {NULL, NULL, 0, NULL}
 };
 

@@ -4,6 +4,7 @@
 '''
 
 import sys, os
+import time
 import ctypes
 from ctypes import cast, POINTER, py_object, c_int
 
@@ -28,6 +29,37 @@ class TestA(object):
     self.b = b
     self.c = c
 
+def draw_curve(axis, n, th):
+  m = n % 4
+  ax = axis[m]
+  x = np.copy(th)
+  y = cpymatplotlib.lissajous_np(x) # overwrite X-Y
+  if m == 0: ax.plot(th, y)
+  elif m == 1: ax.plot(x, y)
+  elif m == 2: return
+  elif m == 3: ax.plot(x, th)
+  lines = ax.plot([], [])
+  ax.relim()
+  ax.grid()
+
+def draw_realtime(seconds):
+  pylab.axis([0, 1000, 0, 1])
+  pylab.ion() # interactive mode
+  pylab.show()
+  fig = pylab.figure()
+  axis = [fig.add_subplot(221 + _ % 4) for _ in range(4)]
+  t = 0
+  for i in range(seconds * 10): # about seconds when time.sleep(.01)
+    th = np.arange(0, 1.98 * np.pi, 0.05) + t / 20.
+    y = cpymatplotlib.cos_func_np(th)
+    axis[2].plot(th, y)
+    [draw_curve(axis, _, th) for _ in range(4) if _ != 2]
+    pylab.draw()
+    time.sleep(.01)
+    t += 1
+    [ax.clear() for ax in axis if ax]
+  pylab.ioff()
+
 def main():
   print 'in'
 
@@ -45,10 +77,7 @@ def main():
 
   print 'out'
 
-  x = np.arange(0, 2 * np.pi, 0.1)
-  y = cpymatplotlib.cos_func_np(x)
-  pylab.plot(x, y)
-  pylab.show()
+  draw_realtime(20)
 
 if __name__ == '__main__':
   main()
