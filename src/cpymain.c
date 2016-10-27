@@ -55,7 +55,7 @@ int main(int ac, char **av)
       Py_DECREF(po);
     }
   }
-#if 1 // success
+#if 0 // success
   char *lines[] = {
     "import memcache",
     "import httplib2",
@@ -69,7 +69,7 @@ int main(int ac, char **av)
     "if header['status'] == '200': sys.stdout.write('body: %s\\n' % bdy)"};
   for(i = 0; i < sizeof(lines) / sizeof(lines[0]); ++i)
     PyRun_SimpleString(lines[i]);
-#else // status=400 when using httplib2.Http(mem, **kwargs)
+#else // success (now solved the problem to call with **kwargs)
   PyObject *mem = NULL;
   PyObject *memcache = PyImport_ImportModule("memcache");
   if(!memcache){
@@ -87,9 +87,10 @@ int main(int ac, char **av)
   if(!httplib2){
     fprintf(stderr, "cannot import httplib2\n");
   }else{
+    PyObject *tpl = PyTuple_Pack(1, mem); // Py_BuildValue("(O)", mem);
     PyObject *kw = Py_BuildValue("{sisO}",
       "timeout", 5, "disable_ssl_certificate_validation", Py_True);
-    http = PyObject_CallMethod(httplib2, "Http", "OO", mem, kw);
+    http = PyObject_Call(PyObject_GetAttrString(httplib2, "Http"), tpl, kw);
 //  http = PyObject_CallMethod(httplib2, "Http", "O", mem); // skip timeout/ssl
     if(!http) fprintf(stderr, "cannot get httplib2.Http(...)\n");
     // status:"408"=RequestTimeout instead of timeout exception
