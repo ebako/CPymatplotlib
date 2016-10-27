@@ -76,9 +76,10 @@ int main(int ac, char **av)
     fprintf(stderr, "cannot import memcache\n");
   }else{
     PyObject *lst = Py_BuildValue("[s]", "127.0.0.1:11211");
+    PyObject *tpl = PyTuple_Pack(1, lst); // Py_BuildValue("(O)", lst);
     PyObject *kw = Py_BuildValue("{sisi}",
       "debug", 0, "server_max_key_length", 999);
-    mem = PyObject_CallMethod(memcache, "Client", "OO", lst, kw);
+    mem = PyObject_Call(PyObject_GetAttrString(memcache, "Client"), tpl, kw);
     if(!mem) fprintf(stderr, "cannot get memcache.Client(...)\n");
   }
   PyObject *hb = NULL;
