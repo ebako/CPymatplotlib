@@ -33,7 +33,7 @@ def draw_curve(axis, n, th):
   m = n % 4
   ax = axis[m]
   x = np.copy(th)
-  y = cpymatplotlib.lissajous_np(x) # overwrite X-Y
+  y = cpymatplotlib.lissajous_np(x, 4., 3.) # overwrite X-Y
   if m == 0: ax.plot(th, y)
   elif m == 1: ax.plot(x, y)
   elif m == 2: return

@@ -158,19 +158,22 @@ __PORT PyObject *lissajous_np(PyObject *self, PyObject *args)
 {
   PyArrayObject *in_array;
   PyObject *out_array;
+  double rs = 1.0, rc = 1.0;
 
-  if(!PyArg_ParseTuple(args, "O!", &PyArray_Type, &in_array)) return NULL;
+  if(!PyArg_ParseTuple(args, "O!dd", &PyArray_Type, &in_array, &rs, &rc))
+    return NULL;
   out_array = PyArray_SimpleNew(
     PyArray_NDIM(in_array), PyArray_DIMS(in_array), PyArray_TYPE(in_array));
   if(out_array == NULL) return NULL;
   else{
     double *din = (double *)PyArray_DATA(in_array);
     double *dout = (double *)PyArray_DATA(out_array);
+    double th;
     int i;
     for(i = 0; i < PyArray_DIMS(in_array)[0]; ++i){ // overwrite X-Y
-      *dout++ = cos(*din * 3.);
-      *din = sin(*din * 4.);
-      ++din;
+      th = *din;
+      *dout++ = sin(th * rs);
+      *din++ = cos(th * rc);
     }
   }
   Py_INCREF(out_array);
