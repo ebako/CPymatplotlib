@@ -43,21 +43,48 @@ int main(int ac, char **av)
   if(!cpymatplotlib){
     fprintf(stderr, "cannot import cpymatplotlib\n");
   }else{
-    PyObject *po = PyObject_CallMethod(cpymatplotlib,
-      "testPyObject", "ids", 511, 255.0, "abc");
-    if(!po){
-      fprintf(stderr, "cannot call testPyObject\n");
+    PyObject *tpl = Py_BuildValue("(ids)", 511, 255.0, "abc");
+#if 0
+    PyObject *ini = PyTuple_New(0);
+    PyObject *a = PyObject_Call(
+      PyObject_GetAttrString(cpymatplotlib, "Nobject"), ini, NULL);
+#else
+    PyObject *a = PyObject_CallObject(
+      PyObject_GetAttrString(cpymatplotlib, "Nobject"), NULL);
+#endif
+    if(!a){
+      fprintf(stderr, "cannot call cpymatplotlib.Nobject\n");
     }else{
-      PyObject *o = PyDict_GetItemString(po, "s");
-      if(!o){
-        fprintf(stderr, "cannot get po['s']\n");
+#if 1
+      PyObject_SetAttrString(a, "a", PyInt_FromLong(123));
+      PyObject_SetAttrString(a, "b", PyLong_FromLong(456));
+      PyObject_SetAttrString(a, "c", PyString_FromString("enroute"));
+#else
+      PyObject *d = PyObject_GetAttrString(a, "__dict__");
+      if(!d){
+        fprintf(stderr, "cannot get a.__dict__\n");
       }else{
-        char *s;
-        Py_INCREF(o);
-        if(!PyArg_Parse(o, "s", &s)){ // s = PyString_AsString(o);
+        PyObject_SetAttrString(d, "a", PyInt_FromLong(123));
+        PyObject_SetAttrString(d, "b", PyLong_FromLong(456));
+        PyObject_SetAttrString(d, "c", PyString_FromString("enroute"));
+      }
+#endif
+    }
+    PyObject *kw = Py_BuildValue("{sO}", "a", a);
+    PyObject *po = PyObject_Call(
+      PyObject_GetAttrString(cpymatplotlib, "cpymPyObject"), tpl, kw);
+    if(!po){
+      fprintf(stderr, "cannot call cpymPyObject\n");
+    }else{
+      PyObject *o = PyDict_GetItemString(po, "o");
+      if(!o){
+        fprintf(stderr, "cannot get po['o']\n");
+      }else{
+        char *s = PyString_AsString(PyObject_CallMethod(o, "__str__", NULL));
+        if(!s){
           fprintf(stderr, "cannot parse StringObject\n");
         }else{
-          fprintf(stdout, "resultPO['s']: [%s]\n", s);
+          fprintf(stdout, "resultPO['o']: [%s]\n", s);
         }
       }
       Py_DECREF(po);
@@ -97,7 +124,7 @@ int main(int ac, char **av)
 #else
       PyObject *x = PyObject_CallMethod(np, "arange", "ddd", 0., 6.19, 0.02);
       dims[0] = PyArray_DIMS(x)[0];
-      PyObject *y = PyObject_CallMethod(cpymatplotlib, "lissajous_np",
+      PyObject *y = PyObject_CallMethod(cpymatplotlib, "npLissajous",
         "Odd", x, 4., 3.);
 #endif
       if(!x || !y){

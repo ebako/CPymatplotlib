@@ -10,6 +10,7 @@
 #endif
 
 #include <Python.h>
+#include <structmember.h>
 #include <windows.h>
 #include <stdio.h>
 
@@ -23,12 +24,15 @@ typedef unsigned char uchar;
 typedef unsigned int uint;
 
 __PORT BOOL APIENTRY DllMain(HINSTANCE, DWORD, LPVOID);
-__PORT uint WINAPI testVoid(void);
-__PORT uint WINAPI testExport(uint a, uint b);
+__PORT uint WINAPI cpymVoid(void);
+__PORT uint WINAPI cpymExport(uint a, uint b);
 
 // must not use WINAPI when returns PyObject *
-__PORT PyObject *testPyObject(PyObject *self, PyObject *args, PyObject *kw);
-__PORT PyObject *cos_func_np(PyObject *self, PyObject *args);
-__PORT PyObject *lissajous_np(PyObject *self, PyObject *args);
+__PORT PyObject *cpymPyObject(PyObject *self, PyObject *args, PyObject *kw);
+__PORT PyObject *cpymFunc(PyObject *self, PyObject *args);
+__PORT PyObject *cpymFuncKwArgs(PyObject *self, PyObject *args, PyObject *kw);
+__PORT PyObject *cpymFuncNoArgs(PyObject *self);
+__PORT PyObject *npCos(PyObject *self, PyObject *args);
+__PORT PyObject *npLissajous(PyObject *self, PyObject *args);
 
 #endif // __CPYMATPLOTLIB_H__

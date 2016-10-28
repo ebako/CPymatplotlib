@@ -10,7 +10,8 @@ PY_INC = -I/$(PYX86)/include
 NP_INC_0 = -I/$(PYX86)/lib/site-packages/numpy/core/include
 NP_INC_1 = -I/$(PYX86)/lib/site-packages/numpy/numarray
 NP_INC = $(NP_INC_0) $(NP_INC_1)
-LOCAL_INC = -I../include
+INC = ../include
+LOCAL_INC = -I$(INC)
 #
 MINGW_DIR = /tdm-gcc-64
 MINGW_LIB = $(MINGW_DIR)/x86_64-w64-mingw32/lib
@@ -93,6 +94,6 @@ $(OUT_DIR)/$(PYD).pyd : $(PYD).o32
 	$(LD) -shared -o $(OUT_DIR)/$(PYD).pyd $(LFLAGS32) \
 $(LIB_DLLPRE32) $(PYD).o32 $(LIB_POST32) $(LIB_PYX86) $(LIB_SUBPROD)
 
-$(PYD).o32 : $(PYD).c
+$(PYD).o32 : $(PYD).c $(INC)/$(PYD).h
 	$(CC) -m32 -o $(PYD).s32 -S $(PYD).c $(CFLAGS)
 	$(CC) -m32 -o $(PYD).o32 -c $(PYD).c $(CFLAGS)

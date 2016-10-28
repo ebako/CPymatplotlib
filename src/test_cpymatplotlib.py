@@ -18,10 +18,10 @@ import cpymatplotlib
 tdll = ctypes.windll
 dllname = 'cpymatplotlib.pyd'
 dllm = tdll.LoadLibrary(dllname)
-testVoid = dllm.testVoid
-testExport = dllm.testExport
+cpymVoid = dllm.cpymVoid
+cpymExport = dllm.cpymExport
 
-testPyObject = cpymatplotlib.testPyObject # or 'from cpymatplotlib import *'
+cpymPyObject = cpymatplotlib.cpymPyObject # or 'from cpymatplotlib import *'
 
 class TestA(object):
   def __init__(self, a, b, c):
@@ -33,7 +33,7 @@ def draw_curve(axis, n, th):
   m = n % 4
   ax = axis[m]
   x = np.copy(th)
-  y = cpymatplotlib.lissajous_np(x, 4., 3.) # overwrite X-Y
+  y = cpymatplotlib.npLissajous(x, 4., 3.) # overwrite X-Y
   if m == 0: ax.plot(th, y)
   elif m == 1: ax.plot(x, y)
   elif m == 2: return
@@ -51,7 +51,7 @@ def draw_realtime(seconds):
   t = 0
   for i in range(seconds * 10): # about seconds when time.sleep(.01)
     th = np.arange(0, 1.98 * np.pi, 0.05) - t / 20.
-    y = cpymatplotlib.cos_func_np(th)
+    y = cpymatplotlib.npCos(th)
     axis[2].plot(th, y)
     [draw_curve(axis, _, th) for _ in range(4) if _ != 2]
     pylab.draw()
@@ -63,17 +63,27 @@ def draw_realtime(seconds):
 def main():
   print 'in'
 
-  print 'result0: ', testVoid()
-  print 'result2: ', testExport(3, 4)
+  print 'result0: ', cpymVoid()
+  print 'result2: ', cpymExport(3, 4)
 
   help(cpymatplotlib)
 
-  p = testPyObject(511, 255.0, 'teststring')
-  print 'resultPO: ', p
+  p = cpymPyObject(511, 255.0, 'teststring')
+  print 'resultPO: [%s]' % str(p)
 
   o = TestA(456, 123, 'enroute')
-  p = testPyObject(i=511, d=255.0, s='teststring', a=o)
-  print 'resultPO: ', p
+  p = cpymPyObject(i=511, d=255.0, s='teststring', a=o)
+  print 'resultPO: [%s]' % str(p)
+
+  p = cpymatplotlib.cpymFuncNoArgs()
+  print 'resultPO: [%s]' % str(p)
+
+  p = cpymatplotlib.cpymFunc(511, 255.0, 'teststring')
+  print 'resultPO: [%s]' % str(p)
+
+  o = TestA(7, 5, 'xyz')
+  p = cpymatplotlib.cpymFuncKwArgs(i=511, d=255.0, s='teststring', a=o)
+  print 'resultPO: [%s]' % str(p)
 
   print 'out'
 
