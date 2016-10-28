@@ -657,14 +657,7 @@ static PyTypeObject NobjectType = {
 };
 
 typedef struct _Abject {
-//PyObject_HEAD             // built-in 'object' // OK but nothing to inherit
-//PyType_Type typ;          // built-in 'type'   // not instance
-//PyBaseObject_Type obj;    // built-in 'object' // not instance
-//PySuper_Type sup;         // built-in 'super'  // not instance
-//PyTypeObject obj;         // inherits PyTypeObject OK
-  PyMethodObject obj;       // inherits PyMethodObject OK
-//PyInstanceMethodObject obj; // unknown ?
-//Nobject obj;              // inherits Nobject OK
+  PyObject_HEAD
 } Abject;
 
 static PyTypeObject AbjectType = {
@@ -750,7 +743,7 @@ PyMODINIT_FUNC initcpymatplotlib()
   if(PyType_Ready(&NoddyType) < 0) return;
   // NobjectType.tp_new = PyType_GenericNew;
   if(PyType_Ready(&NobjectType) < 0) return;
-  AbjectType.tp_new = PyMethod_New; // PyType_GenericNew;
+  AbjectType.tp_new = PyType_GenericNew;
   if(PyType_Ready(&AbjectType) < 0) return;
   PyObject *m = Py_InitModule3("cpymatplotlib",
     cpymatplotlib_methods, cpymatplotlib_docstr);

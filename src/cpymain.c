@@ -45,33 +45,8 @@ int main(int ac, char **av)
   }else{
     PyObject *tpl = Py_BuildValue("(ids)", 511, 255.0, "abc");
 #if 1
-//  PyObject *a = _PyObject_New(&PyType_Type); // has __dict__ ? but not work
-//  a = PyObject_Init(a, &PyType_Type); // UAE
-//  PyObject *a = _PyObject_New(&PyBaseObject_Type); // has no attr __dict__
-//  a = PyObject_Init(a, &PyBaseObject_Type); // no effect
-//  PyObject *a = _PyObject_New(&PySuper_Type); // UAE
-//  a = PyObject_Init(a, &PySuper_Type); // no effect
-//  PyObject *a = _PyObject_New(&PyMethod_Type); // UAE
-//  a = PyObject_Init(a, &PyMethod_Type); // no effect
-//  PyObject *a = _PyObject_New(&PyInstanceMethod_Type); // unknown ?
-//  a = PyObject_Init(a, &PyInstanceMethod_Type); // unknown ?
     PyObject *a = PyObject_CallObject(
       PyObject_GetAttrString(cpymatplotlib, "Abject"), NULL);
-/* these are results when using Abject inherits PyMethodObject
-    >>> import cpymatplotlib
-    >>> o = cpymatplotlib.Abject()
-    >>> o.__dict__
-    <dictproxy object at 0x04FACAD0>
-    >>> dir(o)
-    ['__call__', '__class__', '__cmp__', '__delattr__', '__doc__',
-     '__get__', '__getattribute__', '__hash__', '__init__', '__new__',
-     '__reduce__', '__reduce_ex__', '__repr__', '__setattr__', '__str__',
-     'im_class', 'im_func', 'im_self']
-    >>> o.__dict__.keys()
-    ['__new__', '__doc__']
-    >>> o.__dict__['a'] = 3
-    TypeError: 'dictproxy' object does not support item assignment
-*/
 #else
 #if 1
     PyObject *ini = PyTuple_New(0);
