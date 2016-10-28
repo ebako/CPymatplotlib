@@ -49,10 +49,11 @@ int main(int ac, char **av)
     PyObject *a = PyObject_CallObject(
       PyObject_GetAttrString(cpymatplotlib, "Abject"), NULL);
 #else
-    PyRun_SimpleString("class __A(object): pass");
-    PyObject *m = PyImport_AddModule("__main__");
-    PyObject *a = PyObject_CallObject(
-      PyObject_GetAttrString(m, "__A"), NULL);
+    PyObject *g = PyDict_New();
+    PyDict_SetItemString(g, "__builtins__", PyEval_GetBuiltins());
+    PyObject *r = PyRun_String("class __A(object): pass\n", Py_single_input, g, g);
+    Py_DECREF(r);
+    PyObject *a = PyObject_CallObject(PyDict_GetItemString(g, "__A"), NULL);
     if(a) Py_INCREF(a);
 #endif
 #else
