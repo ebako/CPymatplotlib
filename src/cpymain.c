@@ -45,8 +45,16 @@ int main(int ac, char **av)
   }else{
     PyObject *tpl = Py_BuildValue("(ids)", 511, 255.0, "abc");
 #if 1
+#if 0
     PyObject *a = PyObject_CallObject(
       PyObject_GetAttrString(cpymatplotlib, "Abject"), NULL);
+#else
+    PyRun_SimpleString("class __A(object): pass");
+    PyObject *m = PyImport_AddModule("__main__");
+    PyObject *a = PyObject_CallObject(
+      PyObject_GetAttrString(m, "__A"), NULL);
+    if(a) Py_INCREF(a);
+#endif
 #else
 #if 1
     PyObject *ini = PyTuple_New(0);
