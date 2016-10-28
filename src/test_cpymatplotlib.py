@@ -23,12 +23,6 @@ cpymExport = dllm.cpymExport
 
 cpymPyObject = cpymatplotlib.cpymPyObject # or 'from cpymatplotlib import *'
 
-class TestA(object):
-  def __init__(self, a, b, c):
-    self.a = a
-    self.b = b
-    self.c = c
-
 def draw_curve(axis, n, th):
   m = n % 4
   ax = axis[m]
@@ -71,7 +65,7 @@ def main():
   p = cpymPyObject(511, 255.0, 'teststring')
   print 'resultPO: [%s]' % str(p)
 
-  o = TestA(456, 123, 'enroute')
+  o = cpymatplotlib.Nobject(a=456, b=123, c='enroute')
   p = cpymPyObject(i=511, d=255.0, s='teststring', a=o)
   print 'resultPO: [%s]' % str(p)
 
@@ -81,7 +75,7 @@ def main():
   p = cpymatplotlib.cpymFunc(511, 255.0, 'teststring')
   print 'resultPO: [%s]' % str(p)
 
-  o = TestA(7, 5, 'xyz')
+  o = cpymatplotlib.Nobject(7, 5, 'xyz')
   p = cpymatplotlib.cpymFuncKwArgs(i=511, d=255.0, s='teststring', a=o)
   print 'resultPO: [%s]' % str(p)
 

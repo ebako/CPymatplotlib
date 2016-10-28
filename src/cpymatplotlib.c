@@ -492,7 +492,7 @@ static int Nobject_init(Nobject *self, PyObject *args, PyObject *kw)
   if(a){
     tmp = self->a;
     Py_INCREF(a);
-    self->b = a;
+    self->a = a;
     Py_XDECREF(tmp); // must *NOT* decrement reference counter before assign
   }
   if(b){

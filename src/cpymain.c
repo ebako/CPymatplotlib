@@ -44,7 +44,7 @@ int main(int ac, char **av)
     fprintf(stderr, "cannot import cpymatplotlib\n");
   }else{
     PyObject *tpl = Py_BuildValue("(ids)", 511, 255.0, "abc");
-#if 0
+#if 1
     PyObject *ini = PyTuple_New(0);
     PyObject *a = PyObject_Call(
       PyObject_GetAttrString(cpymatplotlib, "Nobject"), ini, NULL);
