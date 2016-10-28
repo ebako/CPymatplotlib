@@ -44,6 +44,11 @@ int main(int ac, char **av)
     fprintf(stderr, "cannot import cpymatplotlib\n");
   }else{
     PyObject *tpl = Py_BuildValue("(ids)", 511, 255.0, "abc");
+#if 0
+//  PyObject *a = _PyObject_New(&PyType_Type); // has __dict__ ? but not work
+//  PyObject *a = _PyObject_New(&PyBaseObject_Type); // has no attr __dict__
+//  PyObject *a = _PyObject_New(&PySuper_Type); // UAE
+#else
 #if 1
     PyObject *ini = PyTuple_New(0);
     PyObject *a = PyObject_Call(
@@ -51,6 +56,7 @@ int main(int ac, char **av)
 #else
     PyObject *a = PyObject_CallObject(
       PyObject_GetAttrString(cpymatplotlib, "Nobject"), NULL);
+#endif
 #endif
     if(!a){
       fprintf(stderr, "cannot call cpymatplotlib.Nobject\n");

@@ -657,7 +657,11 @@ static PyTypeObject NobjectType = {
 };
 
 typedef struct _Abject {
-  Nobject nobj;
+//PyObject_HEAD             // built-in 'object' but nothing to inherit
+//PyType_Type typ;          // built-in 'type'
+//PyBaseObject_Type obj;    // built-in 'object'
+//PySuper_Type sup;         // built-in 'super'
+  Nobject nobj;             // inherits Nobject
 } Abject;
 
 static PyTypeObject AbjectType = {
