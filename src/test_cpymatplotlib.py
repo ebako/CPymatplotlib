@@ -65,7 +65,8 @@ def main():
   p = cpymPyObject(511, 255.0, 'teststring')
   print 'resultPO: [%s]' % str(p)
 
-  o = cpymatplotlib.Nobject(a=456, b=123, c='enroute')
+  # o = cpymatplotlib.Nobject(a=456, b=123, c='enroute')
+  o = cpymatplotlib.Cbject(); o.a=456; o.b=123; o.c='enroute'
   p = cpymPyObject(i=511, d=255.0, s='teststring', a=o)
   print 'resultPO: [%s]' % str(p)
 
@@ -75,7 +76,8 @@ def main():
   p = cpymatplotlib.cpymFunc(511, 255.0, 'teststring')
   print 'resultPO: [%s]' % str(p)
 
-  o = cpymatplotlib.Nobject(7, 5, 'xyz')
+  # o = cpymatplotlib.Nobject(7, 5, 'xyz')
+  o = cpymatplotlib.Cbject(); o.a=7; o.b=5; o.c='xyz'
   p = cpymatplotlib.cpymFuncKwArgs(i=511, d=255.0, s='teststring', a=o)
   print 'resultPO: [%s]' % str(p)
 

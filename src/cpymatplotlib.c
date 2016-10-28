@@ -756,6 +756,12 @@ PyMODINIT_FUNC initcpymatplotlib()
   PyModule_AddObject(m, "Nobject", (PyObject *)&NobjectType);
   Py_INCREF(&AbjectType);
   PyModule_AddObject(m, "Abject", (PyObject *)&AbjectType);
+  PyObject *g = PyModule_GetDict(m);
+  if(!PyDict_GetItemString(g, "__builtins__"))
+    PyDict_SetItemString(g, "__builtins__", PyEval_GetBuiltins());
+  char *meta = "class Cbject(object): pass\n";
+  PyObject *r = PyRun_String(meta, Py_single_input, g, g);
+  Py_DECREF(r);
 }
 
 BOOL APIENTRY DllMain(HINSTANCE inst, DWORD reason, LPVOID reserved)

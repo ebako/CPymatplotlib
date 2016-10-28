@@ -44,24 +44,15 @@ int main(int ac, char **av)
     fprintf(stderr, "cannot import cpymatplotlib\n");
   }else{
     PyObject *tpl = Py_BuildValue("(ids)", 511, 255.0, "abc");
-#if 1
-#if 0
+#if 1 // success
     PyObject *a = PyObject_CallObject(
-      PyObject_GetAttrString(cpymatplotlib, "Abject"), NULL);
+      PyObject_GetAttrString(cpymatplotlib, "Cbject"), NULL);
 #else
-    PyObject *g = PyDict_New();
-    PyDict_SetItemString(g, "__builtins__", PyEval_GetBuiltins());
-    PyObject *r = PyRun_String("class __A(object): pass\n", Py_single_input, g, g);
-    Py_DECREF(r);
-    PyObject *a = PyObject_CallObject(PyDict_GetItemString(g, "__A"), NULL);
-    if(a) Py_INCREF(a);
-#endif
-#else
-#if 1
+#if 1 // success
     PyObject *ini = PyTuple_New(0);
     PyObject *a = PyObject_Call(
       PyObject_GetAttrString(cpymatplotlib, "Nobject"), ini, NULL);
-#else
+#else // success
     PyObject *a = PyObject_CallObject(
       PyObject_GetAttrString(cpymatplotlib, "Nobject"), NULL);
 #endif
@@ -69,11 +60,11 @@ int main(int ac, char **av)
     if(!a){
       fprintf(stderr, "cannot call cpymatplotlib.Nobject\n");
     }else{
-#if 0
+#if 0 // success both when use Cbject and Nobject
       PyObject_SetAttrString(a, "a", PyInt_FromLong(123));
       PyObject_SetAttrString(a, "b", PyLong_FromLong(456));
       PyObject_SetAttrString(a, "c", PyString_FromString("enroute"));
-#else
+#else // success only when use Cbject
       PyObject *d = PyObject_GetAttrString(a, "__dict__");
       if(!d){
         fprintf(stderr, "cannot get a.__dict__\n");
