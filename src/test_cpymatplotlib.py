@@ -54,7 +54,7 @@ def draw_realtime(seconds):
     [ax.clear() for ax in axis if ax]
   pylab.ioff()
 
-def main():
+def test_funcs():
   print 'in'
 
   print 'result0: ', cpymVoid()
@@ -66,7 +66,7 @@ def main():
   print 'resultPO: [%s]' % str(p)
 
   # o = cpymatplotlib.Nobject(a=456, b=123, c='enroute')
-  o = cpymatplotlib.Cbject(); o.a=456; o.b=123; o.c='enroute'
+  o = cpymatplotlib.Cbject(a=456, b=123, c='enroute')
   p = cpymPyObject(i=511, d=255.0, s='teststring', a=o)
   print 'resultPO: [%s]' % str(p)
 
@@ -77,13 +77,25 @@ def main():
   print 'resultPO: [%s]' % str(p)
 
   # o = cpymatplotlib.Nobject(7, 5, 'xyz')
-  o = cpymatplotlib.Cbject(); o.a=7; o.b=5; o.c='xyz'
-  p = cpymatplotlib.cpymFuncKwArgs(i=511, d=255.0, s='teststring', a=o)
+  o = cpymatplotlib.Cbject(); o.a=7; o.c='xyz' # test AttributeError
+  try:
+    p = cpymatplotlib.cpymFuncKwArgs(i=511, d=255.0, s='teststring', a=o)
+  except (Exception, AttributeError, ), e: # not caught it here, broken stack ?
+    print '**** err (caught here) [%s] ****' % str(e)
   print 'resultPO: [%s]' % str(p)
 
   print 'out'
 
+def main():
+  try:
+    test_funcs()
+  except (Exception, AttributeError, ), e: # not caught it here, broken stack ?
+    print '**** err (caught in main) [%s] ****' % str(e)
   draw_realtime(20)
 
 if __name__ == '__main__':
-  main()
+  try:
+    main()
+  except (Exception, AttributeError, ), e: # caught it here
+    print '**** err (caught in root) [%s] ****' % str(e)
+  print 'done.'

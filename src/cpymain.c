@@ -43,39 +43,41 @@ int main(int ac, char **av)
   if(!cpymatplotlib){
     fprintf(stderr, "cannot import cpymatplotlib\n");
   }else{
-    PyObject *tpl = Py_BuildValue("(ids)", 511, 255.0, "abc");
-#if 1 // success
-    PyObject *a = PyObject_CallObject(
-      PyObject_GetAttrString(cpymatplotlib, "Cbject"), NULL);
-#else
-#if 1 // success
+    char *cls[] = {"Cbject", "Nobject"};
+    int nc = 0; // test 0:Cbject, 1:Nobject
+#if 1 // success __init__ with kwargs
+    PyObject *kws = Py_BuildValue("{sO}", "b", PyLong_FromLong(456));
     PyObject *ini = PyTuple_New(0);
     PyObject *a = PyObject_Call(
-      PyObject_GetAttrString(cpymatplotlib, "Nobject"), ini, NULL);
-#else // success
+      PyObject_GetAttrString(cpymatplotlib, cls[nc]), ini, kws);
+#else // success __init__ with noargs
     PyObject *a = PyObject_CallObject(
-      PyObject_GetAttrString(cpymatplotlib, "Nobject"), NULL);
-#endif
+      PyObject_GetAttrString(cpymatplotlib, cls[nc]), NULL);
 #endif
     if(!a){
-      fprintf(stderr, "cannot call cpymatplotlib.Nobject\n");
+      fprintf(stderr, "cannot call cpymatplotlib.%s\n", cls[nc]);
     }else{
-#if 0 // success both when use Cbject and Nobject
+      // success SetAttrString when use both Cbject and Nobject
       PyObject_SetAttrString(a, "a", PyInt_FromLong(123));
-      PyObject_SetAttrString(a, "b", PyLong_FromLong(456));
-      PyObject_SetAttrString(a, "c", PyString_FromString("enroute"));
-#else // success only when use Cbject
-      PyObject *d = PyObject_GetAttrString(a, "__dict__");
-      if(!d){
-        fprintf(stderr, "cannot get a.__dict__\n");
-      }else{
-        PyDict_SetItemString(d, "a", PyInt_FromLong(123));
-        PyDict_SetItemString(d, "b", PyLong_FromLong(456));
-        PyDict_SetItemString(d, "c", PyString_FromString("enroute"));
+      // about subproduction of PyObject_GetAttrString()
+      if(PyObject_HasAttrString(a, "__dict__")){
+        // success only when use Cbject ('a' will be broken when use Nobject)
+        PyObject *d = PyObject_GetAttrString(a, "__dict__");
+        if(!d){
+          fprintf(stderr, "cannot get a.__dict__\n");
+        }else{
+          PyDict_SetItemString(d, "c", PyString_FromString("enroute"));
+        }
+      }else{ // *MUST* skip above block when use Nobject
+        // otherwise 'a' will *NOT* be an correct object anymore ?
+        // perhaps something will be happened in PyObject_GetAttrString(noattr)
+        // and on below code, 'a' could not be set "{sO}" as a valid kw object
+        // so raised 'ERROR: PyArg_ParseTupleAndKeywords()' in cpymPyObject()
+        fprintf(stderr, "not have attr a.__dict__\n");
       }
-#endif
     }
     PyObject *kw = Py_BuildValue("{sO}", "a", a);
+    PyObject *tpl = Py_BuildValue("(ids)", 511, 255.0, "abc");
     PyObject *po = PyObject_Call(
       PyObject_GetAttrString(cpymatplotlib, "cpymPyObject"), tpl, kw);
     if(!po){

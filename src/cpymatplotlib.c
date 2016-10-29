@@ -69,8 +69,15 @@ __PORT PyObject *cpymPyObject(PyObject *self, PyObject *args, PyObject *kw)
   if(a){
     char *ks[] = {"a", "b", "c"};
     int i;
-    for(i = 0; i < sizeof(ks) / sizeof(ks[0]); ++i)
+    for(i = 0; i < sizeof(ks) / sizeof(ks[0]); ++i){
+#if 0 // test AttributeError
+      PyObject *v = PyObject_GetAttrString(a, ks[i]);
+      if(v) PyDict_SetItemString(pdi, ks[i], v);
+#else
+      if(!PyObject_HasAttrString(a, ks[i])) continue;
       PyDict_SetItemString(pdi, ks[i], PyObject_GetAttrString(a, ks[i]));
+#endif
+    }
   }
 
   // return self; // wrong way
@@ -142,8 +149,15 @@ __PORT PyObject *cpymFuncKwArgs(PyObject *self, PyObject *args, PyObject *kw)
   if(a){
     char *ks[] = {"a", "b", "c"};
     int i;
-    for(i = 0; i < sizeof(ks) / sizeof(ks[0]); ++i)
+    for(i = 0; i < sizeof(ks) / sizeof(ks[0]); ++i){
+#if 0 // test AttributeError
+      PyObject *v = PyObject_GetAttrString(a, ks[i]);
+      if(v) PyDict_SetItemString(pdi, ks[i], v);
+#else
+      if(!PyObject_HasAttrString(a, ks[i])) continue;
       PyDict_SetItemString(pdi, ks[i], PyObject_GetAttrString(a, ks[i]));
+#endif
+    }
   }
 
   // return self; // wrong way ?
@@ -759,7 +773,9 @@ PyMODINIT_FUNC initcpymatplotlib()
   PyObject *g = PyModule_GetDict(m);
   if(!PyDict_GetItemString(g, "__builtins__"))
     PyDict_SetItemString(g, "__builtins__", PyEval_GetBuiltins());
-  char *meta = "class Cbject(object): pass\n";
+  char *meta = "class Cbject(object):\n"\
+    "  def __init__(self, **kw):\n"\
+    "    [setattr(self, k, kw[k]) for k in kw]\n";
   PyObject *r = PyRun_String(meta, Py_single_input, g, g);
   Py_DECREF(r);
 }
