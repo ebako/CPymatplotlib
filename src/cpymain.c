@@ -73,6 +73,7 @@ int main(int ac, char **av)
         // perhaps something will be happened in PyObject_GetAttrString(noattr)
         // and on below code, 'a' could not be set "{sO}" as a valid kw object
         // so raised 'ERROR: PyArg_ParseTupleAndKeywords()' in cpymPyObject()
+        // or a problem of reference counter Py_INCREF() / Py_DECREF() ?
         fprintf(stderr, "not have attr a.__dict__\n");
       }
     }
