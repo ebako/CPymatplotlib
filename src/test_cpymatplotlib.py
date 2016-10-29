@@ -80,22 +80,16 @@ def test_funcs():
   o = cpymatplotlib.Cbject(); o.a=7; o.c='xyz' # test AttributeError
   try:
     p = cpymatplotlib.cpymFuncKwArgs(i=511, d=255.0, s='teststring', a=o)
-  except (Exception, AttributeError, ), e: # not caught it here, broken stack ?
-    print '**** err (caught here) [%s] ****' % str(e)
+  except (Exception, AttributeError, ), e: # not caught anymore
+    print '**** err [%s] ****' % str(e)
   print 'resultPO: [%s]' % str(p)
 
   print 'out'
 
 def main():
-  try:
-    test_funcs()
-  except (Exception, AttributeError, ), e: # not caught it here, broken stack ?
-    print '**** err (caught in main) [%s] ****' % str(e)
+  test_funcs()
   draw_realtime(20)
 
 if __name__ == '__main__':
-  try:
-    main()
-  except (Exception, AttributeError, ), e: # caught it here
-    print '**** err (caught in root) [%s] ****' % str(e)
+  main()
   print 'done.'

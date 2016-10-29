@@ -70,9 +70,15 @@ __PORT PyObject *cpymPyObject(PyObject *self, PyObject *args, PyObject *kw)
     char *ks[] = {"a", "b", "c"};
     int i;
     for(i = 0; i < sizeof(ks) / sizeof(ks[0]); ++i){
-#if 0 // test AttributeError
+#if 1 // test AttributeError
       PyObject *v = PyObject_GetAttrString(a, ks[i]);
       if(v) PyDict_SetItemString(pdi, ks[i], v);
+      else if(PyErr_Occurred()){ // exceptions.AttributeError
+        PyObject *excType, *excValue, *excTraceback;
+        PyErr_Fetch(&excType, &excValue, &excTraceback);
+        PyErr_NormalizeException(&excType, &excValue, &excTraceback);
+        fprintf(stderr, "cleanup exceptions.AttributeError\n");
+      }
 #else
       if(!PyObject_HasAttrString(a, ks[i])) continue;
       PyDict_SetItemString(pdi, ks[i], PyObject_GetAttrString(a, ks[i]));
@@ -150,9 +156,15 @@ __PORT PyObject *cpymFuncKwArgs(PyObject *self, PyObject *args, PyObject *kw)
     char *ks[] = {"a", "b", "c"};
     int i;
     for(i = 0; i < sizeof(ks) / sizeof(ks[0]); ++i){
-#if 0 // test AttributeError
+#if 1 // test AttributeError
       PyObject *v = PyObject_GetAttrString(a, ks[i]);
       if(v) PyDict_SetItemString(pdi, ks[i], v);
+      else if(PyErr_Occurred()){ // exceptions.AttributeError
+        PyObject *excType, *excValue, *excTraceback;
+        PyErr_Fetch(&excType, &excValue, &excTraceback);
+        PyErr_NormalizeException(&excType, &excValue, &excTraceback);
+        fprintf(stderr, "cleanup exceptions.AttributeError\n");
+      }
 #else
       if(!PyObject_HasAttrString(a, ks[i])) continue;
       PyDict_SetItemString(pdi, ks[i], PyObject_GetAttrString(a, ks[i]));
