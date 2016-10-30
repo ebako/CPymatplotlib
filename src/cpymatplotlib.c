@@ -78,16 +78,21 @@ __PORT PyObject *cpymProcessException(PyObject *self, PyObject *args, PyObject *
     PyFrameObject *frame = tstat->frame;
     if(!frame) fprintf(stderr, "  error: [!frame] broken stack ?\n");
     else{
+      // PyTracebackObject* tb = (PyTracebackObject*)tstat->curexc_traceback;
+      // PyTracebackObject* tb = (PyTracebackObject*)tstat->exc_traceback;
+      // PyTracebackObject* tb = (PyTracebackObject*)tstat->async_exc;
       PyTracebackObject* tb = (PyTracebackObject*)frame->f_exc_traceback;
       if(!tb){
         fprintf(stderr, "  error: [!tb] another stack ?\n");
         while(frame){ // backword
-          tbInfo(frame->f_lineno, frame->f_code);
+          // tbInfo(frame->f_lineno, frame->f_code); // not the correct number
+          /* need to call PyCode_Addr2Line() */
+          tbInfo(PyCode_Addr2Line(frame->f_code, frame->f_lasti), frame->f_code);
           frame = frame->f_back;
         }
       }else{
         while(tb){ // forward
-          tbInfo(tb->tb_lineno, tb->tb_frame->f_code);
+          tbInfo(tb->tb_lineno, tb->tb_frame->f_code); // is tb_lineno correct ?
           tb = tb->tb_next;
         }
       }
