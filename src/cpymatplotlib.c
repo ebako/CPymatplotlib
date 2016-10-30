@@ -35,6 +35,78 @@ __PORT uint WINAPI cpymExport(uint a, uint b)
   return a + b;
 }
 
+__PORT PyObject *cpymProcessException(PyObject *self, PyObject *args, PyObject *kw)
+{
+  char *s;
+  PyObject *ptyp = NULL;
+  PyObject *pval = NULL;
+  PyObject *ptb = NULL;
+
+  FILE *fp = fopen(TESTLOG, "ab");
+  fprintf(fp, "cpymProcessException %08x %08x %08x\n",
+    (uchar *)self, (uchar *)args, (uchar *)kw);
+  fclose(fp);
+
+  // if(obj == Py_None){ }
+
+  char *keys[] = {"s", "typ", "val", "tb", NULL};
+  if(!PyArg_ParseTupleAndKeywords(args, kw, "|sOOO", keys, &s, &ptyp, &pval, &ptb)){
+    FILE *fp = fopen(TESTLOG, "ab");
+    fprintf(fp, "ERROR: PyArg_ParseTupleAndKeywords()\n");
+    fclose(fp);
+    return NULL;
+  }else{
+    FILE *fp = fopen(TESTLOG, "ab");
+    fprintf(fp, "SUCCESS: PyArg_ParseTupleAndKeywords(%s, %08x, %08x, %08x)\n", s, (char *)ptyp, (char *)pval, (char *)ptb);
+    fclose(fp);
+  }
+
+  PyObject *mtb = PyImport_ImportModule("traceback");
+  if(!mtb) fprintf(stderr, "cannot import traceback\n");
+  else{
+    char *fmt[] = {"format_exception_only", "format_exception"};
+    PyObject *formatted_list;
+    if(!ptb){
+#if 0 // success, but failure when NULL object
+      formatted_list = PyObject_Call(PyObject_GetAttrString(mtb, fmt[0]),
+        PyTuple_Pack(2, ptyp, pval), NULL);
+#else // success: more safely than PyTuple_Pack when NULL object
+      formatted_list = PyObject_CallMethod(mtb, fmt[0],
+        "OO", ptyp, pval);
+#endif
+    }else{
+#if 0 // success, but failure when NULL object
+      formatted_list = PyObject_Call(PyObject_GetAttrString(mtb, fmt[1]),
+        PyTuple_Pack(3, ptyp, pval, ptb), NULL);
+#else // success: more safely than PyTuple_Pack when NULL object
+      formatted_list = PyObject_CallMethod(mtb, fmt[1],
+        "OOO", ptyp, pval, ptb);
+#endif
+/*
+            PyTracebackObject* tb = (PyTracebackObject*)ptb;
+            while(tb->tb_next) tb = tb->tb_next; // last frame
+            // struct _frame in frameobject.h (tb->tb_frame->f_code->..)
+            int line = tb->tb_lineno;
+            char *file = PyString_AsString(tb->tb_frame->f_code->co_filename);
+            char *fnc = PyString_AsString(tb->tb_frame->f_code->co_name);
+            fprintf(stderr, "[%s]:(%d):%s\n", file, line, fnc);
+*/
+    }
+    if(!formatted_list){
+      fprintf(stderr, "None == traceback.%s(...)\n", fmt[ptb ? 1 : 0]);
+    }else{
+      long len = PyLong_AsLong(
+        PyObject_CallMethod(formatted_list, "__len__", NULL));
+      if(0) fprintf(stderr, "traceback.%s(...): %d\n", fmt[ptb ? 1 : 0], len);
+      long i;
+      for(i = 0; i < len; ++i)
+        fprintf(stderr, "%s", PyString_AsString(
+          PyList_GetItem(formatted_list, i)));
+    }
+  }
+  return Py_BuildValue("{ss}", "s", s);
+}
+
 __PORT PyObject *cpymPyObject(PyObject *self, PyObject *args, PyObject *kw)
 {
   int i;
@@ -73,12 +145,7 @@ __PORT PyObject *cpymPyObject(PyObject *self, PyObject *args, PyObject *kw)
 #if 1 // test AttributeError
       PyObject *v = PyObject_GetAttrString(a, ks[i]);
       if(v) PyDict_SetItemString(pdi, ks[i], v);
-      else if(PyErr_Occurred()){ // exceptions.AttributeError
-        PyObject *excType, *excValue, *excTraceback;
-        PyErr_Fetch(&excType, &excValue, &excTraceback);
-        PyErr_NormalizeException(&excType, &excValue, &excTraceback);
-        fprintf(stderr, "cleanup exceptions.AttributeError\n");
-      }
+      else CPYMPROCESSEXCEPTION("cpymPyObject"); // exceptions.AttributeError
 #else
       if(!PyObject_HasAttrString(a, ks[i])) continue;
       PyDict_SetItemString(pdi, ks[i], PyObject_GetAttrString(a, ks[i]));
@@ -159,12 +226,7 @@ __PORT PyObject *cpymFuncKwArgs(PyObject *self, PyObject *args, PyObject *kw)
 #if 1 // test AttributeError
       PyObject *v = PyObject_GetAttrString(a, ks[i]);
       if(v) PyDict_SetItemString(pdi, ks[i], v);
-      else if(PyErr_Occurred()){ // exceptions.AttributeError
-        PyObject *excType, *excValue, *excTraceback;
-        PyErr_Fetch(&excType, &excValue, &excTraceback);
-        PyErr_NormalizeException(&excType, &excValue, &excTraceback);
-        fprintf(stderr, "cleanup exceptions.AttributeError\n");
-      }
+      else CPYMPROCESSEXCEPTION("cpymFuncKwArgs"); // exceptions.AttributeError
 #else
       if(!PyObject_HasAttrString(a, ks[i])) continue;
       PyDict_SetItemString(pdi, ks[i], PyObject_GetAttrString(a, ks[i]));
@@ -182,7 +244,7 @@ __PORT PyObject *cpymFuncKwArgs(PyObject *self, PyObject *args, PyObject *kw)
 
 __PORT PyObject *cpymFuncNoArgs(PyObject *self)
 {
-  char *rs[] = {"0: hello", "1: cpymatplotlib", "2: zzzzzzzz"};
+  char *rs[] = {"0: hello", "1: "CPYMATPLOTLIB, "2: zzzzzzzz"};
   PyObject *pls = PyList_New(sizeof(rs) / sizeof(rs[0])); // (PyListObject *)
   PyObject *pm_hashlib = PyImport_ImportModule("hashlib");
 
@@ -239,7 +301,7 @@ __PORT PyObject *cpymFuncNoArgs(PyObject *self)
 #endif
     return Py_BuildValue("O", pls);
   }
-  return Py_BuildValue("s", "hello cpymatplotlib TEST");
+  return Py_BuildValue("s", "hello "CPYMATPLOTLIB" TEST");
 }
 
 __PORT PyObject *npCos(PyObject *self, PyObject *args)
@@ -499,7 +561,7 @@ static PyMethodDef Noddy_methods[] = {
 static PyTypeObject NoddyType = {
   PyObject_HEAD_INIT(NULL)  // PyObject_HEAD_INIT(&PyType_Type) <- PyType_Ready
   0,                        // ob_size
-  "cpymatplotlib.Noddy",    // tp_name
+  CPYMATPLOTLIB".Noddy",    // tp_name
   sizeof(Noddy),            // tp_basicsize
   0,                        // tp_itemsize
   (destructor)Noddy_dealloc, // tp_dealloc
@@ -642,7 +704,7 @@ static PyMethodDef Nobject_methods[] = {
 static PyTypeObject NobjectType = {
   PyObject_HEAD_INIT(NULL)  // PyObject_HEAD_INIT(&PyType_Type) <- PyType_Ready
   0,                        // ob_size
-  "cpymatplotlib.Nobject",  // tp_name
+  CPYMATPLOTLIB".Nobject",  // tp_name
   sizeof(Nobject),          // tp_basicsize
   0,                        // tp_itemsize
   (destructor)Nobject_dealloc, // tp_dealloc
@@ -689,7 +751,7 @@ typedef struct _Abject {
 static PyTypeObject AbjectType = {
   PyObject_HEAD_INIT(NULL)  // PyObject_HEAD_INIT(&PyType_Type) <- PyType_Ready
   0,                        // ob_size
-  "cpymatplotlib.Abject",   // tp_name
+  CPYMATPLOTLIB".Abject",   // tp_name
   sizeof(Abject),           // tp_basicsize
   0,                        // tp_itemsize
 0,//  (destructor)Abject_dealloc, // tp_dealloc
@@ -730,6 +792,13 @@ static PyTypeObject AbjectType = {
 };
 
 static PyMethodDef cpymatplotlib_methods[] = {
+  {"cpymProcessException", (PyCFunction)cpymProcessException,
+    METH_VARARGS | METH_KEYWORDS, "*args, **kw:\n"
+    " s:\n"
+    " typ:\n"
+    " val:\n"
+    " tb:\n"
+    "result: dict (output to stderr)"},
   {"cpymPyObject", (PyCFunction)cpymPyObject,
     METH_VARARGS | METH_KEYWORDS, "*args, **kw:\n"
     " i:\n"
@@ -753,10 +822,10 @@ static PyMethodDef cpymatplotlib_methods[] = {
   {"cpymFuncNoArgs", (PyCFunction)cpymFuncNoArgs,
     METH_NOARGS, "no args:\n"
     "result: always fixed msg."},
-  {"npCos", (PyCFunction)npCos, METH_VARARGS,
-    "evaluate the cosine on a numpy array"},
-  {"npLissajous", (PyCFunction)npLissajous, METH_VARARGS,
-    "X-Y lissajous on a numpy array"},
+  {"npCos", (PyCFunction)npCos,
+    METH_VARARGS, "evaluate the cosine on a numpy array"},
+  {"npLissajous", (PyCFunction)npLissajous,
+    METH_VARARGS, "X-Y lissajous on a numpy array"},
   {NULL, NULL, 0, NULL}
 };
 
@@ -771,7 +840,7 @@ PyMODINIT_FUNC initcpymatplotlib()
   if(PyType_Ready(&NobjectType) < 0) return;
   AbjectType.tp_new = PyType_GenericNew;
   if(PyType_Ready(&AbjectType) < 0) return;
-  PyObject *m = Py_InitModule3("cpymatplotlib",
+  PyObject *m = Py_InitModule3(CPYMATPLOTLIB,
     cpymatplotlib_methods, cpymatplotlib_docstr);
   if(!m) return;
   /* IMPORTANT: this must be called */
