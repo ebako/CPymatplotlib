@@ -46,32 +46,8 @@ static int tbInfo(int line, PyCodeObject *f_code)
   return 0;
 }
 
-__PORT PyObject *cpymProcessException(PyObject *self, PyObject *args, PyObject *kw)
+static int tbDisp(char *s)
 {
-  char *s;
-  PyObject *ptyp = NULL;
-  PyObject *pval = NULL;
-  PyObject *ptb = NULL;
-
-  FILE *fp = fopen(TESTLOG, "ab");
-  fprintf(fp, "cpymProcessException %08x %08x %08x\n",
-    (uchar *)self, (uchar *)args, (uchar *)kw);
-  fclose(fp);
-
-  // if(obj == Py_None){ }
-
-  char *keys[] = {"s", "typ", "val", "tb", NULL};
-  if(!PyArg_ParseTupleAndKeywords(args, kw, "|sOOO", keys, &s, &ptyp, &pval, &ptb)){
-    FILE *fp = fopen(TESTLOG, "ab");
-    fprintf(fp, "ERROR: PyArg_ParseTupleAndKeywords()\n");
-    fclose(fp);
-    return NULL;
-  }else{
-    FILE *fp = fopen(TESTLOG, "ab");
-    fprintf(fp, "SUCCESS: PyArg_ParseTupleAndKeywords(%s, %08x, %08x, %08x)\n", s, (char *)ptyp, (char *)pval, (char *)ptb);
-    fclose(fp);
-  }
-
   fprintf(stderr, "Traceback (most recent call last): --[%s]--\n", s ? s:"");
   PyThreadState *tstat = PyThreadState_GET();
   if(tstat && tstat->frame){
@@ -100,6 +76,36 @@ __PORT PyObject *cpymProcessException(PyObject *self, PyObject *args, PyObject *
   }else{
     fprintf(stderr, "  error: [!tstat || !tstat->frame] another thread ?\n");
   }
+  return 0;
+}
+
+__PORT PyObject *cpymProcessException(PyObject *self, PyObject *args, PyObject *kw)
+{
+  char *s;
+  PyObject *ptyp = NULL;
+  PyObject *pval = NULL;
+  PyObject *ptb = NULL;
+
+  FILE *fp = fopen(TESTLOG, "ab");
+  fprintf(fp, "cpymProcessException %08x %08x %08x\n",
+    (uchar *)self, (uchar *)args, (uchar *)kw);
+  fclose(fp);
+
+  // if(obj == Py_None){ }
+
+  char *keys[] = {"s", "typ", "val", "tb", NULL};
+  if(!PyArg_ParseTupleAndKeywords(args, kw, "|sOOO", keys, &s, &ptyp, &pval, &ptb)){
+    FILE *fp = fopen(TESTLOG, "ab");
+    fprintf(fp, "ERROR: PyArg_ParseTupleAndKeywords()\n");
+    fclose(fp);
+    return NULL;
+  }else{
+    FILE *fp = fopen(TESTLOG, "ab");
+    fprintf(fp, "SUCCESS: PyArg_ParseTupleAndKeywords(%s, %08x, %08x, %08x)\n", s, (char *)ptyp, (char *)pval, (char *)ptb);
+    fclose(fp);
+  }
+
+  tbDisp(s);
 
   PyObject *mtb = PyImport_ImportModule("traceback");
   if(!mtb) fprintf(stderr, "cannot import traceback\n");
