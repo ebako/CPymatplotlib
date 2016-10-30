@@ -35,6 +35,17 @@ __PORT uint WINAPI cpymExport(uint a, uint b)
   return a + b;
 }
 
+static int tbInfo(int line, PyCodeObject *f_code)
+{
+  // struct _frame in frameobject.h
+  //   (frame->f_code->..)
+  //   (tb->tb_frame->f_code->..)
+  char *file = PyString_AsString(f_code->co_filename);
+  char *fnc = PyString_AsString(f_code->co_name);
+  fprintf(stderr, "    %s(%d): %s\n", file, line, fnc);
+  return 0;
+}
+
 __PORT PyObject *cpymProcessException(PyObject *self, PyObject *args, PyObject *kw)
 {
   char *s;
@@ -61,6 +72,30 @@ __PORT PyObject *cpymProcessException(PyObject *self, PyObject *args, PyObject *
     fclose(fp);
   }
 
+  fprintf(stderr, "Traceback (most recent call last): --[%s]--\n", s ? s:"");
+  PyThreadState *tstat = PyThreadState_GET();
+  if(tstat && tstat->frame){
+    PyFrameObject *frame = tstat->frame;
+    if(!frame) fprintf(stderr, "  error: [!frame] broken stack ?\n");
+    else{
+      PyTracebackObject* tb = (PyTracebackObject*)frame->f_exc_traceback;
+      if(!tb){
+        fprintf(stderr, "  error: [!tb] another stack ?\n");
+        while(frame){ // backword
+          tbInfo(frame->f_lineno, frame->f_code);
+          frame = frame->f_back;
+        }
+      }else{
+        while(tb){ // forward
+          tbInfo(tb->tb_lineno, tb->tb_frame->f_code);
+          tb = tb->tb_next;
+        }
+      }
+    }
+  }else{
+    fprintf(stderr, "  error: [!tstat || !tstat->frame] another thread ?\n");
+  }
+
   PyObject *mtb = PyImport_ImportModule("traceback");
   if(!mtb) fprintf(stderr, "cannot import traceback\n");
   else{
@@ -82,15 +117,6 @@ __PORT PyObject *cpymProcessException(PyObject *self, PyObject *args, PyObject *
       formatted_list = PyObject_CallMethod(mtb, fmt[1],
         "OOO", ptyp, pval, ptb);
 #endif
-/*
-            PyTracebackObject* tb = (PyTracebackObject*)ptb;
-            while(tb->tb_next) tb = tb->tb_next; // last frame
-            // struct _frame in frameobject.h (tb->tb_frame->f_code->..)
-            int line = tb->tb_lineno;
-            char *file = PyString_AsString(tb->tb_frame->f_code->co_filename);
-            char *fnc = PyString_AsString(tb->tb_frame->f_code->co_name);
-            fprintf(stderr, "[%s]:(%d):%s\n", file, line, fnc);
-*/
     }
     if(!formatted_list){
       fprintf(stderr, "None == traceback.%s(...)\n", fmt[ptb ? 1 : 0]);
