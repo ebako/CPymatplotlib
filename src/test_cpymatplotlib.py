@@ -23,8 +23,10 @@ cpymExport = dllm.cpymExport
 
 cpymPyObject = cpymatplotlib.cpymPyObject # or 'from cpymatplotlib import *'
 
+NAXIS = 4
+
 def draw_curve(axis, n, th):
-  m = n % 4
+  m = n % NAXIS
   ax = axis[m]
   x = np.copy(th)
   y = cpymatplotlib.npLissajous(x, 4., 3.) # overwrite X-Y
@@ -41,13 +43,13 @@ def draw_realtime(seconds):
   pylab.ion() # interactive mode
   pylab.show()
   fig = pylab.figure()
-  axis = [fig.add_subplot(221 + _ % 4) for _ in range(4)]
+  axis = [fig.add_subplot(221 + _ % NAXIS) for _ in range(NAXIS)]
   t = 0
   for i in range(seconds * 10): # about seconds when time.sleep(.01)
     th = np.arange(0, 1.98 * np.pi, 0.05) - t / 20.
     y = cpymatplotlib.npCos(th)
     axis[2].plot(th, y)
-    [draw_curve(axis, _, th) for _ in range(4) if _ != 2]
+    [draw_curve(axis, _, th) for _ in range(NAXIS) if _ != 2]
     pylab.draw()
     time.sleep(.01)
     t += 1
