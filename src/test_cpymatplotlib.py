@@ -39,21 +39,22 @@ def draw_curve(axis, n, th):
   ax.grid()
 
 def draw_realtime(seconds):
-  pylab.axis([0, 1000, 0, 1])
+  # pylab.axis([0, 1000, 0, 1])
   pylab.ion() # interactive mode
-  pylab.show()
   fig = pylab.figure()
   axis = [fig.add_subplot(221 + _ % NAXIS) for _ in range(NAXIS)]
-  t = 0
-  for i in range(seconds * 10): # about seconds when time.sleep(.01)
+  def incnum(t):
+    if t >= seconds * 10: return # about seconds when .after(10, ...)
+    [ax.clear() for ax in axis if ax]
     th = np.arange(0, 1.98 * np.pi, 0.05) - t / 20.
     y = cpymatplotlib.npCos(th)
     axis[2].plot(th, y)
     [draw_curve(axis, _, th) for _ in range(NAXIS) if _ != 2]
     pylab.draw()
-    time.sleep(.01)
-    t += 1
-    [ax.clear() for ax in axis if ax]
+    fig.canvas.get_tk_widget().after(10, incnum, t + 1)
+  incnum(0)
+  pylab.show()
+  pylab.close('all')
   pylab.ioff()
 
 def test_funcs():
