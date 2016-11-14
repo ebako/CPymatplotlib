@@ -50,7 +50,7 @@ def draw_realtime(seconds):
     y = cpymatplotlib.npCos(th)
     axis[2].plot(th, y)
     [draw_curve(axis, _, th) for _ in range(NAXIS) if _ != 2]
-    pylab.draw()
+    fig.canvas.draw()
     fig.canvas.get_tk_widget().after(10, incnum, t + 1)
   incnum(0)
   pylab.show()
