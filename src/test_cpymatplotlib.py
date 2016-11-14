@@ -42,7 +42,10 @@ def draw_realtime(seconds):
   # pylab.axis([0, 1000, 0, 1])
   pylab.ion() # interactive mode
   fig = pylab.figure()
+  canvas = fig.canvas
+  tkc = canvas.get_tk_widget()
   axis = [fig.add_subplot(221 + _ % NAXIS) for _ in range(NAXIS)]
+  tkc.bind('<Destroy>', lambda e: e.widget.after_cancel(tid), '+')
   def incnum(t):
     if t >= seconds * 10: return # about seconds when .after(10, ...)
     [ax.clear() for ax in axis if ax]
@@ -50,8 +53,9 @@ def draw_realtime(seconds):
     y = cpymatplotlib.npCos(th)
     axis[2].plot(th, y)
     [draw_curve(axis, _, th) for _ in range(NAXIS) if _ != 2]
-    fig.canvas.draw()
-    fig.canvas.get_tk_widget().after(10, incnum, t + 1)
+    canvas.draw()
+    global tid
+    tid = tkc.after(10, incnum, t + 1)
   incnum(0)
   pylab.show()
   pylab.close('all')
