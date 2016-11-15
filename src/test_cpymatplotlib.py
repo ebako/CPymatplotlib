@@ -45,7 +45,7 @@ def draw_realtime(seconds):
   canvas = fig.canvas
   tkc = canvas.get_tk_widget()
   axis = [fig.add_subplot(221 + _ % NAXIS) for _ in range(NAXIS)]
-  tkc.bind('<Destroy>', lambda e: e.widget.after_cancel(tid), '+')
+  tkc.bind('<Destroy>', lambda e: e.widget.after_cancel(tkc.tid), '+')
   def incnum(t):
     if t >= seconds * 10: return # about seconds when .after(10, ...)
     [ax.clear() for ax in axis if ax]
@@ -54,8 +54,7 @@ def draw_realtime(seconds):
     axis[2].plot(th, y)
     [draw_curve(axis, _, th) for _ in range(NAXIS) if _ != 2]
     canvas.draw()
-    global tid
-    tid = tkc.after(10, incnum, t + 1)
+    tkc.tid = tkc.after(10, incnum, t + 1)
   incnum(0)
   pylab.show()
   pylab.close('all')
